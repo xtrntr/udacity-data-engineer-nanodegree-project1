@@ -1,3 +1,11 @@
+# DROP TABLES
+
+songplay_table_drop = "DROP TABLE IF EXISTS songplays;"
+user_table_drop = "DROP TABLE IF EXISTS users;"
+song_table_drop = "DROP TABLE IF EXISTS songs;"
+artist_table_drop = "DROP TABLE IF EXISTS artists;"
+time_table_drop = "DROP TABLE IF EXISTS time;"
+
 # PREREQUISITES
 
 level_type_create = ("""
@@ -26,7 +34,7 @@ user_agent text
 
 user_table_create = ("""
 create table if not exists users (
-user_id integer,
+user_id integer primary key,
 first_name text,
 last_name text,
 gender char(1),
@@ -36,7 +44,7 @@ level level
 
 song_table_create = ("""
 create table if not exists songs (
-song_id text,
+song_id text primary key,
 title text,
 artist_id text,
 year integer,
@@ -46,7 +54,7 @@ duration double precision
 
 artist_table_create = ("""
 create table if not exists artists (
-artist_id text,
+artist_id text primary key,
 name text,
 location text,
 lattitude real,
@@ -72,18 +80,23 @@ songplay_table_insert = ("""
 insert into songplays (start_time, user_id, level, song_id,
                        artist_id, session_id, location, user_agent)
                        values (%s, %s, %s, %s, %s, %s, %s, %s)
+on conflict (songplay_id) do update set
+songplay_id = songplays.songplay_id
 """)
 
 user_table_insert = ("""
 insert into users (user_id, first_name, last_name, gender, level) values (%s, %s, %s, %s, %s)
+on conflict (user_id) do update set level = excluded.level
 """)
 
 song_table_insert = ("""
 insert into songs (song_id, title, artist_id, year, duration) values (%s, %s, %s, %s, %s)
+on conflict (song_id) do nothing
 """)
 
 artist_table_insert = ("""
 insert into artists (artist_id, name, location, lattitude, longitude) values (%s, %s, %s, %s, %s)
+on conflict (artist_id) do nothing
 """)
 
 time_table_insert = ("""
@@ -100,5 +113,6 @@ where songs.song_id=%s and artists.name=%s and songs.duration=%s;
 
 # QUERY LISTS
 
+drop_table_queries = [songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
 setup_queries = [level_type_create]
 create_table_queries = [songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]

@@ -6,6 +6,13 @@ import datetime
 from sql_queries import *
 
 def process_song_file(cur, filepath):
+    """
+    Inputs: database cursor, filepath
+
+    The filepath is assumed to point to a songfile otherwise it will fail.
+    It extracts both song and artist information to store into the songs and artists table respectively.
+    """
+
     # open song file
     song_df = pd.read_json(filepath, lines=True)
 
@@ -17,8 +24,17 @@ def process_song_file(cur, filepath):
     artist_data = list(song_df[['artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude']].values[0])
     cur.execute(artist_table_insert, artist_data)
 
-
 def process_log_file(cur, filepath):
+    """
+    Inputs: database cursor, filepath
+
+    The filepath is assumed to point to a logfile otherwise it will fail.
+    Only rows with the column `page` == "NextSong" are processed.
+    It extracts time information from the column `ts` to store into time table.
+    It extracts user information to store into the user table.
+    It extracts songplay information by joining the song and artist table and extracting some other rows from the logfile.
+    """
+
     # open log file
     df = pd.read_json(filepath, lines=True)
 
@@ -69,6 +85,14 @@ def process_log_file(cur, filepath):
 
 
 def process_data(cur, conn, filepath, func):
+    """
+    Inputs: database cursor, postgres, directory filepath, python function
+    python function must have a function signature similar to `process_log_file`, `process_song_file`
+
+    given a directory of files, recursively walk through all folders and collect the filenames in a list
+    apply the given function on all the collected filenames after.
+    """
+
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
