@@ -21,8 +21,8 @@ end $$;
 songplay_table_create = ("""
 create table if not exists songplays (
 songplay_id serial primary key,
-start_time timestamp,
-user_id integer,
+start_time timestamp not null,
+user_id integer not null,
 level level,
 song_id text,
 artist_id text,
